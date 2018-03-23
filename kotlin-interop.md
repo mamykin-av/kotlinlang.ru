@@ -204,12 +204,12 @@ int d = ExampleKt.MAX;
 int v = C.VERSION;
 ```
 
-## Static Methods
+## Статические методы
 
-As mentioned above, Kotlin represents package-level functions as static methods.
-Kotlin can also generate static methods for functions defined in named objects or companion objects if you annotate those functions as `@JvmStatic`.
-If you use this annotation, the compiler will generate both a static method in the enclosing class of the object and an instance method in the object itself.
-For example:
+Как упоминалось выше, Kotlin представляет функции уровня пакета как статические методы.
+Kotlin также может генерировать статические методы для функций, определенных в именованных объектах или объектах-компанбонах, если вы аннотируете эти функции как `@ JvmStatic`.
+Если вы используете эту аннотацию, компилятор будет генерировать как статический метод в охватывающем классе объекта, так и метод экземпляра в самом объекте.
+Например:
 
 ``` kotlin
 class C {
@@ -220,16 +220,16 @@ class C {
 }
 ```
 
-Now, `foo()` is static in Java, while `bar()` is not:
+Теперь, `foo()` это статический метод в Java, хотя `bar()` не статический:
 
 ``` java
-C.foo(); // works fine
-C.bar(); // error: not a static method
-C.Companion.foo(); // instance method remains
-C.Companion.bar(); // the only way it works
+C.foo(); // работает
+C.bar(); // ошибка: не статический метод
+C.Companion.foo(); // остался метод экземпляра
+C.Companion.bar(); // работает только так
 ```
 
-Same for named objects:
+То же самое для именованных объектов:
 
 ``` kotlin
 object Obj {
@@ -238,7 +238,7 @@ object Obj {
 }
 ```
 
-In Java:
+В Java:
 
 ``` java
 Obj.foo(); // works fine
@@ -247,44 +247,45 @@ Obj.INSTANCE.bar(); // works, a call through the singleton instance
 Obj.INSTANCE.foo(); // works too
 ```
 
-`@JvmStatic` annotation can also be applied on a property of an object or a companion object
-making its getter and setter methods be static members in that object or the class containing the companion object.
+Аннотация `@JvmStatic` также может быть применена к свойствам объекта или объекта-компаньона,
+делая их геттеры и сеттеры статическими членами в этом объекте, или классе, содержащем объект-компаньон.
 
-## Visibility
+## Область видимости
 
-The Kotlin visibilities are mapped to Java in the following way:
+Область видимости в Kotlin преобразуется в Java следующим способом:
 
-* `private` members are compiled to `private` members;
-* `private` top-level declarations are compiled to package-local declarations;
-* `protected` remains `protected` (note that Java allows accessing protected members from other classes in the same package
-and Kotlin doesn't, so Java classes will have broader access to the code);
-* `internal` declarations become `public` in Java. Members of `internal` classes go through name mangling, to make
-it harder to accidentally use them from Java and to allow overloading for members with the same signature that don't see
-each other according to Kotlin rules;
-* `public` remains `public`.
+* `private` члены компилируются в `private` члены;
+* `private` объявления верхнего уровня компилируются в объявления с областью видимости на уровне пакета;
+* `protected` остаётся `protected` (учтите, что разрешает доступ к защищённым членам из других классов в том же пакете,
+а Kotlin - нет, то есть Java классы имеют более широкий доступ к коду);
+* `internal` становятся `public` в Java. Члены `internal` классов переименовываются, чтобы,
+уменьшить вероятность их случайного использования сJava и разрешить перегрузку для членов с той же сигнатурой, которые не видят
+друг друга в Kotlin;
+* `public` остаётся `public`.
 
 ## KClass
 
-Sometimes you need to call a Kotlin method with a parameter of type `KClass`.
-There is no automatic conversion from `Class` to `KClass`, so you have to do it manually by invoking the equivalent of
-the `Class<T>.kotlin` extension property:
+Иногда вам нужно вызвать метод Kotlin с параметром типа `KClass`.
+Автоматическое преобразование из класса «Class» в «KClass» отсутствует, поэтому вам нужно сделать это вручную, вызывая эквивалентное
+свойство расширения класса <T> .kotlin`:
 
 ```kotlin
 kotlin.jvm.JvmClassMappingKt.getKotlinClass(MainView.class)
 ```
 
-## Handling signature clashes with @JvmName
+## Обработка конфликтов сигнатур с @JvmName
 
-Sometimes we have a named function in Kotlin, for which we need a different JVM name the byte code.
-The most prominent example happens due to *type erasure*:
+Иногда у нас есть именованная функция в Kotlin, для которой нам нужно другое имя в JVM байткоде.
+Самый яркий пример такого случая это *стирание типа *:
 
 ``` kotlin
 fun List<String>.filterValid(): List<String>
 fun List<Int>.filterValid(): List<Int>
 ```
 
-These two functions can not be defined side-by-side, because their JVM signatures are the same: `filterValid(Ljava/util/List;)Ljava/util/List;`.
-If we really want them to have the same name in Kotlin, we can annotate one (or both) of them with `@JvmName` and specify a different name as an argument:
+Эти две функции не могут быть определены в одном месте, потому что их подписи JVM одинаковы: `filterValid (Ljava / util / List;) Ljava / util / List;`.
+Если мы действительно хотим, чтобы они имели одинаковое имя в Kotlin, мы можем аннотировать один (или оба) из них с помощью `@ JvmName` и указать другое имя в качестве аргумента:
+
 
 ``` kotlin
 fun List<String>.filterValid(): List<String>
@@ -293,9 +294,10 @@ fun List<String>.filterValid(): List<String>
 fun List<Int>.filterValid(): List<Int>
 ```
 
-From Kotlin they will be accessible by the same name `filterValid`, but from Java it will be `filterValid` and `filterValidInt`.
+Из Kotlin они будут доступны под одним и тем же именем `filterValid`, но из Java это будут доступны как `filterValid` и `filterValidInt`.
 
-The same trick applies when we need to have a property `x` alongside with a function `getX()`:
+Тот же трюк применяется, когда нам нужно иметь свойство `x` вместе с функцией `getX()`:
+
 
 ``` kotlin
 val x: Int
@@ -306,14 +308,13 @@ fun getX() = 10
 ```
 
 
-## Overloads Generation
+## Генерация перегруженных методов
 
-Normally, if you write a Kotlin function with default parameter values, it will be visible in Java only as a full
-signature, with all parameters present. If you wish to expose multiple overloads to Java callers, you can use the
-`@JvmOverloads` annotation.
+Обычно, если вы пишете функцию Kotlin со значениями параметров по умолчанию, она будет видна на Java только как функция со всеми параметрами. Если вы хотите видеть все варианты перегруженной функции в вызывающем коде Java, вы можете использовать
+аннотацию `@JvmOverloads`.
 
-The annotation also works for constructors, static methods etc. It can't be used on abstract methods, including methods
-defined in interfaces.
+Аннотации также работают для конструкторов, статических методов и т.д. Их нельзя использовать для абстрактных методов, включая методы
+объявленные в интерфейсах.
 
 ``` kotlin
 class Foo @JvmOverloads constructor(x: Int, y: Double = 0.0) {
@@ -323,9 +324,9 @@ class Foo @JvmOverloads constructor(x: Int, y: Double = 0.0) {
 }
 ```
 
-For every parameter with a default value, this will generate one additional overload, which has this parameter and
-all parameters to the right of it in the parameter list removed. In this example, the following will be
-generated:
+Для каждого параметра со значением по умолчанию это создаст одну дополнительную перегрузку, которая включает этот параметр и
+все не имеет остальных. В этом примере будет сгенерирован следующий код:
+
 
 ``` java
 // Constructors:
@@ -338,16 +339,15 @@ void f(String a, int b) { }
 void f(String a) { }
 ```
 
-Note that, as described in [Secondary Constructors](classes.html#secondary-constructors), if a class has default
-values for all constructor parameters, a public no-argument constructor will be generated for it. This works even
-if the `@JvmOverloads` annotation is not specified.
+Обратите внимание, что, как описано в [Вторичные конструкторы] (classes.html # secondary-constructors), если класс имеет значение по умолчанию для всех параметров конструктора, для него будет создан публичный конструктор без аргументов. Это работает даже
+если аннотация `@ JvmOverloads` не указана.
 
 
-## Checked Exceptions
+## Проверяемые исключения
 
-As we mentioned above, Kotlin does not have checked exceptions.
-So, normally, the Java signatures of Kotlin functions do not declare exceptions thrown.
-Thus if we have a function in Kotlin like this:
+Как мы уже упоминали выше, в Kotlin нет проверяемых исключений.
+То есть нормально, когда Java-сигнатура Kotlin-функции не объявляет исключений, которые выбрасывает.
+Таким образом, если функция в Kotlin выглядит следующим образом:
 
 ``` kotlin
 // example.kt
@@ -358,7 +358,7 @@ fun foo() {
 }
 ```
 
-And we want to call it from Java and catch the exception:
+И мы хотим вызвать её из Java и поймать исключение:
 
 ``` java
 // Java
@@ -370,8 +370,8 @@ catch (IOException e) { // error: foo() does not declare IOException in the thro
 }
 ```
 
-we get an error message from the Java compiler, because `foo()` does not declare `IOException`.
-To work around this problem, use the `@Throws` annotation in Kotlin:
+мы получаем сообщение об ошибке из компилятора Java, потому что `foo ()` не объявляет `IOException`.
+Чтобы обойти эту проблему, используйте аннотацию `@ Throws` в Kotlin:
 
 ``` kotlin
 @Throws(IOException::class)
@@ -380,16 +380,16 @@ fun foo() {
 }
 ```
 
-## Null-safety
+## Null-безопасность
 
-When calling Kotlin functions from Java, nobody prevents us from passing *null*{: .keyword } as a non-null parameter.
-That's why Kotlin generates runtime checks for all public functions that expect non-nulls.
-This way we get a `NullPointerException` in the Java code immediately.
+При вызове функций Kotlin из Java никто не мешает нам передавать *null* {: .keyword} в качестве ненулевого параметра.
+Вот почему Kotlin генерирует проверки времени выполнения для всех публичных функций, которые ожидают не-null значений.
+Таким образом мы сразу получаем «NullPointerException» в Java-коде.
 
-## Variant generics
+## Обобщения вариантов?
 
-When Kotlin classes make use of [declaration-site variance](generics.html#declaration-site-variance), there are two 
-options of how their usages are seen from the Java code. Let's say we have the following class and two functions that use it:
+Когда классы Kotlin используют [declaration-site variance] (generics.html # declaration-site-variance), есть два
+варианта того, как их будет видно из Java кода. Допустим, у нас есть следующий класс и две функции, которые его используют:
 
 ``` kotlin
 class Box<out T>(val value: T)
@@ -401,16 +401,14 @@ fun boxDerived(value: Derived): Box<Derived> = Box(value)
 fun unboxBase(box: Box<Base>): Base = box.value
 ```
 
-A naive way of translating these functions into Java would be this:
+Наивный способ трансляции этих функций в Java был бы следующим:
  
 ``` java
 Box<Derived> boxDerived(Derived value) { ... }
 Base unboxBase(Box<Base> box) { ... }
 ``` 
 
-The problem is that in Kotlin we can say `unboxBase(boxDerived("s"))`, but in Java that would be impossible, because in Java 
-  the class `Box` is *invariant* in its parameter `T`, and thus `Box<Derived>` is not a subtype of `Box<Base>`. 
-  To make it work in Java we'd have to define `unboxBase` as follows:
+Проблема в том, что в Kotlin мы можем сказать `unboxBase (boxDerived ("s"))`, но в Java это было бы невозможно, потому что в Java класс `Box` *инвариантен* в своем параметре `T`, и поэтому `Box <Derived>` не является подтипом `Box <Base>`. Чтобы он работал на Java, нам нужно было бы определить `unboxBase` следующим образом:
   
 ``` java
 Base unboxBase(Box<? extends Base> box) { ... }  
